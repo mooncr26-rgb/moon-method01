@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOON METHOD</title>
+  <style>
+    body { 
+      background: #0a0a0c; 
+      color: #ffffff; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0; 
+      padding: 0;
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      overflow-x: hidden;
+      background-image: radial-gradient(circle at 50% 30%, #141416 0%, #050506 100%);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .stardust {
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+      background-size: 45px 45px;
+      z-index: -1;
+    }
+
+    .moon-glow-container { 
+      position: absolute; 
+      top: 40px; 
+      left: 40px; 
+      width: 80px; 
+      height: 80px; 
+      border: 1px solid rgba(255, 255, 255, 0.8); 
+      border-radius: 50%; 
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.1); 
+    }
+
+    @media (max-width: 1480px) {
+      .moon-glow-container { position: relative; top: 20px; left: 0; margin-bottom: 20px; }
+    }
+
+    .side-ornament {
+      position: fixed;
+      top: 10%;
+      bottom: 10%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(255, 59, 48, 0.2), transparent);
+      z-index: 1;
+    }
+    .side-ornament::before, .side-ornament::after {
+      content: '+';
+      position: absolute;
+      color: rgba(255, 59, 48, 0.4);
+      font-family: monospace;
+      font-size: 14px;
+      left: -4px;
+    }
+    .side-ornament::before { top: 0; }
+    .side-ornament::after { bottom: 0; }
+    .ornament-left { left: 1%; }
+    .ornament-right { right: 1%; }
+
+    @media (max-width: 1750px) {
+      .side-ornament { display: none; }
+    }
+
+    #login-overlay { 
+      position: fixed; 
+      inset: 0; 
+      z-index: 999; 
+      background: #060608;
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px;
+    }
+    
+    .login-card { 
+      background: #0b0b0d; 
+      border: 1px solid rgba(255, 59, 48, 0.6); 
+      border-radius: 16px; 
+      padding: 40px 30px; 
+      width: 100%;
+      max-width: 440px; 
+      text-align: center;
+      box-shadow: 0 0 35px rgba(255, 59, 48, 0.15);
+    }
+    
+    .beta-tag { color: #ff3b30; font-size: 11px; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; }
+    .login-card h2 { font-size: 24px; margin: 0 0 15px 0; font-weight: 600; line-height: 1.3; color: #fff; }
+    .login-card p { color: #8e8e93; font-size: 13px; line-height: 1.6; margin: 0 0 25px 0; }
+    .input-wrapper { text-align: left; margin-bottom: 20px; }
+    .input-wrapper label { font-size: 11px; color: #8e8e93; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+    
+    input[type="password"] { 
+      width: 100%; 
+      background: #000; 
+      border: 1px solid #2c2c2e; 
+      border-radius: 8px; 
+      color: #fff; 
+      padding: 14px; 
+      box-sizing: border-box; 
+      font-size: 16px;
+    }
+    input[type="password"]:focus { border-color: #ff3b30; outline: none; box-shadow: 0 0 10px rgba(255, 59, 48, 0.2); }
+    
+    .unlock-btn { 
+      width: 100%; 
+      background: #ff3b30; 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 14px; 
+      font-size: 15px; 
+      font-weight: bold; 
+      cursor: pointer; 
+    }
+    .unlock-btn:hover { background: #d9231a; }
+    .footer-note { font-size: 11px; color: #48484a; margin-top: 25px; }
+
+    .interface-wrapper {
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      width: 98%;
+      max-width: 1680px; 
+      margin: 50px auto;
+      z-index: 2;
+    }
+
+    #main-ui { 
+      width: 100%; 
+      max-width: 660px; 
+      flex-shrink: 0;
+    }
+    
+    h1 { 
+      text-align: center; 
+      font-size: 36px; 
+      letter-spacing: 20px; 
+      font-weight: 300; 
+      margin-bottom: 45px; 
+      color: #ffffff;
+    }
+    
+    .drop-zone { 
+      border: 2px dashed rgba(255, 59, 48, 0.4); 
+      border-radius: 24px; 
+      padding: 50px 30px; 
+      text-align: center; 
+      margin-bottom: 20px; 
+      cursor: pointer; 
+      background: rgba(20, 20, 23, 0.7);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.2s;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: #ff3b30; background: rgba(255, 59, 48, 0.05); }
+    
+    .upload-icon { width: 40px; height: 40px; margin-bottom: 15px; color: #ff3b30; }
+    .drop-title { font-size: 22px; font-weight: bold; color: #ffffff; margin: 0 0 8px 0; }
+    .drop-subtitle { font-size: 14px; color: #8e8e93; margin: 0 0 12px 0; }
+    .drop-info { font-size: 12px; color: #48484a; margin: 0; }
+    
+    .choose-btn {
+      display: inline-block;
+      background: #ff3b30;
+      color: #ffffff;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 35px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .choose-btn:hover { background: #d9231a; }
+    
+    .action-btn { width: 100%; padding: 16px; background: #ffffff; color: #000; border: none; font-weight: bold; font-size: 13px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; font-family: monospace; margin-bottom: 40px; }
+    .action-btn:hover { background: #e5e5ea; }
+    .action-btn:disabled { background: #48484a; color: #8e8e93; cursor: not-allowed; }
+
+    .hb-container { border: 1px solid #2c2c2e; padding: 25px; margin-bottom: 25px; font-family: monospace; font-size: 13px; line-height: 1.7; background: rgba(15, 15, 18, 0.8); color: #e5e5ea; }
+    .hb-title { font-weight: bold; letter-spacing: 1px; color: #ffffff; margin-bottom: 15px; display: block; }
+
+    .accordion-item { border: 1px solid #2c2c2e; border-radius: 8px; margin-bottom: 12px; background: rgba(15, 15, 18, 0.8); overflow: hidden; }
+    .accordion-header { padding: 18px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 13px; letter-spacing: 1px; font-family: monospace; }
+    .accordion-header span { color: #ff3b30; font-size: 16px; }
+    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: #aeaeae; font-size: 13px; line-height: 1.6; }
+    .accordion-content-inner { padding: 5px 20px 20px 20px; }
+    .accordion-item.active .accordion-content { max-height: 1000px; }
+    .faq-block { margin-bottom: 20px; }
+    .faq-block strong { color: #fff; display: block; margin-bottom: 6px; }
+
+    .comparison-card {
+      width: 450px; 
+      background: rgba(11, 11, 13, 0.85);
+      border: 1px solid #2c2c2e;
+      border-radius: 20px;
+      padding: 25px;
+      box-sizing: border-box;
+      margin-top: 140px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+      flex-shrink: 0;
+    }
+    
+    .comparison-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      display: block;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #141416;
+      min-height: 280px;
+    }
+
+    .comparison-label {
+      font-size: 22px; 
+      line-height: 1.4;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 700; 
+      letter-spacing: -0.2px;
+    }
+
+    .left-side .comparison-label { color: #a1a1a5; }
+    .left-side { border-color: rgba(142, 142, 147, 0.2); }
+
+    .right-side .comparison-label { color: #ffffff; text-shadow: 0 0 14px rgba(255, 59, 48, 0.8); }
+    .right-side { border-color: rgba(255, 59, 48, 0.5); box-shadow: 0 0 30px rgba(255, 59, 48, 0.08); }
+
+    @media (max-width: 1480px) {
+      .interface-wrapper { flex-direction: column; align-items: center; gap: 30px; margin-top: 20px; }
+      .comparison-card { width: 100%; max-width: 660px; margin-top: 0; }
+      .left-side { order: 2; }
+      #main-ui { order: 1; }
+      .right-side { order: 3; }
+    }
+
+    .custom-footer-links {
+      display: flex;
+      justify-content: flex-end;
+      gap: 30px;
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #1c1c1e;
+      font-size: 12px;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+    .footer-tab { color: #8e8e93; cursor: pointer; text-transform: uppercase; transition: color 0.2s; }
+    .footer-tab:hover { color: #ff3b30; }
+
+    @media (max-width: 600px) {
+      .custom-footer-links { justify-content: center; gap: 20px; font-size: 11px; }
+    }
+
+    .info-sheet { 
+      display: none; 
+      border: 1px solid rgba(255, 59, 48, 0.3); 
+      background: #0f0f12; 
+      padding: 25px; 
+      margin-top: 20px; 
+      font-size: 13px; 
+      line-height: 1.7; 
+      color: #d1d1d6; 
+      border-radius: 8px;
+    }
+    .info-sheet strong { color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="stardust"></div>
+  <div class="moon-glow-container"></div>
+  
+  <div class="side-ornament ornament-left"></div>
+  <div class="side-ornament ornament-right"></div>
+
+  <div id="login-overlay">
+    <div class="login-card">
+      <div class="beta-tag">CLOSED BETA</div>
+      <h2>The Moon Method is invite-only right now.</h2>
+      <p>If you have the beta password, enter it below. We'll remember you on this device for 30 days.</p>
+      
+      <div class="input-wrapper">
+        <label>PASSWORD</label>
+        <input type="password" id="passInput" onkeydown="if(event.key==='Enter') verifyKey()">
+      </div>
+      
+      <button class="unlock-btn" onclick="verifyKey()">Unlock</button>
+      <div class="footer-note">Don't have a password? Ask whoever invited you.</div>
+    </div>
+  </div>
+
+  <div class="interface-wrapper" id="app-content">
+    
+    <div class="comparison-card left-side">
+      <div class="comparison-label">ასე ტვირთავს ვიდეოს ტიკტოკი მეთოდის გარეშე</div>
+      <img src="low-quality-imageedit_1_4416051844.jpg" alt="Low quality simulation">
+    </div>
+
+    <div id="main-ui">
+      <h1>MOON</h1>
+      
+      <div class="drop-zone" id="dropZone">
+        <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+        </svg>
+        <div class="drop-title" id="dropTitle">Drop your MP4 here</div>
+        <div class="drop-subtitle" id="dropSubtitle">or click to choose a file</div>
+        <div class="drop-info">up to 100 MB · MP4 only · HandBrake export recommended</div>
+        <button class="choose-btn" type="button" onclick="document.getElementById('videoFile').click()">Choose video</button>
+      </div>
+      
+      <input type="file" id="videoFile" accept="video/mp4" style="display:none">
+      <button class="action-btn" id="patchBtn" onclick="uploadAndPatch()" disabled>Start Patching</button>
+
+      <div class="hb-container">
+        <span class="hb-title">MOON HANDBRAKE METHOD</span>
+        Encoder: H.264 · High · Level Auto<br>
+        Rate control: Avg Bitrate, 2-pass<br>
+        Resolution: 1080p (2K/4K)<br>
+        Framerate: 60 or 120, constant<br>
+        Max size: under 100 MB<br><br>
+        Bitrate guide (kbps): 15s → 43000, 20s → 32000, 30s → 22000, 45s → 14000, 60s → 10500.
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleFAQ(this)">FAQ: The straight answers. <span>+</span></div>
+        <div class="accordion-content">
+          <div class="accordion-content-inner">
+            <div class="faq-block">
+              <strong>What exactly does this preserve on TikTok?</strong>
+              Both resolution and framerate. TikTok normally caps your upload to 720p, 30 fps regardless of what you sent in. With the Moon Method, your full 1080p (or 4K) at 60 fps (or 120 fps) gets through 1:1 with your source.
+            </div>
+            <div class="faq-block">
+              <strong>Does it work for 4K and 120 fps too?</strong>
+              Yes. The method supports the full range — 1080p 60, 1080p 120, 4K 60, and 4K 120. For the closed beta server you'll want shorter clips so the export stays under 100 MB.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="dynamicInfoSheet" class="info-sheet"></div>
+
+      <div class="custom-footer-links">
+        <span class="footer-tab" onclick="showSheet('about')">About</span>
+        <span class="footer-tab" onclick="showSheet('terms')">Terms</span>
+        <span class="footer-tab" onclick="showSheet('privacy')">Privacy</span>
+      </div>
+    </div>
+
+    <div class="comparison-card right-side">
+      <div class="comparison-label">ასე იტვირთება ვიდეო ტიკტოკზე MOON ის მეთოდით</div>
+      <img src="imageedit_1_4416051844.jpg" alt="Moon quality presentation">
+    </div>
+
+  </div>
+
+  <script>
+    let selectedFile = null;
+    const dropZone = document.getElementById('dropZone');
+    const videoFileInput = document.getElementById('videoFile');
+    const patchBtn = document.getElementById('patchBtn');
+    const dropTitle = document.getElementById('dropTitle');
+    const dropSubtitle = document.getElementById('dropSubtitle');
+
+    function verifyKey() {
+      const input = document.getElementById('passInput').value;
+      if (input === 'MOONNINA') {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('app-content').style.display = 'flex';
+      } else {
+        alert('Invalid beta security key.');
+      }
+    }
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+
+    videoFileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileSelect(e.target.files[0]);
+      }
+    });
+
+    dropZone.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') {
+        videoFileInput.click();
+      }
+    });
+
+    function handleFileSelect(file) {
+      if (file.type !== 'video/mp4') {
+        alert('გთხოვთ აირჩიოთ მხოლოდ MP4 ფორმატის ვიდეო!');
+        return;
+      }
+      selectedFile = file;
+      dropTitle.textContent = "ვიდეო არჩეულია!";
+      dropSubtitle.textContent = file.name + ` (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+      patchBtn.disabled = false;
+    }
+
+    async function uploadAndPatch() {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append('video', selectedFile);
+
+      patchBtn.disabled = true;
+      patchBtn.textContent = "Processing... Please wait...";
+      dropTitle.textContent = "მიმდინარეობს დამუშავება...";
+
+      try {
+        const response = await fetch('/patch-video', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('სერვერული შეცდომა ვიდეოს დამუშავებისას.');
+
+        const patchedBlob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(patchedBlob);
+        
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = "moon_patched_" + selectedFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        patchBtn.textContent = "Start Patching";
+        dropTitle.textContent = "წარმატებით დაპატჩდა! გადმოწერა დაიწყო.";
+        dropSubtitle.textContent = "შეგიძლიათ ახალი ვიდეო აირჩიოთ.";
+        selectedFile = null;
+      } catch (error) {
+        alert('დაფიქსირდა შეცდომა: ' + error.message);
+        patchBtn.disabled = false;
+        patchBtn.textContent = "Start Patching";
+        dropTitle.textContent = "Drop your MP4 here";
+      }
+    }
+
+    function toggleFAQ(header) {
+      const item = header.parentElement;
+      const indicator = header.querySelector('span');
+      item.classList.toggle('active');
+      indicator.textContent = item.classList.contains('active') ? '×' : '+';
+    }
+
+    const textData = {
+      about: "The Moon Method is a tool to bypass TikTok's compression system, preserving full original source clarity.",
+      terms: "Terms of service: For research and content creation enhancement purposes only under Closed Beta license.",
+      privacy: "Privacy notice: All video streams are temporary and auto-deleted strictly upon download delivery completion."
+    };
+
+    function showSheet(key) {
+      const sheet = document.getElementById('dynamicInfoSheet');
+      if (sheet.style.display === 'block' && sheet.dataset.current === key) {
+        sheet.style.display = 'none';
+      } else {
+        sheet.innerHTML = textData[key];
+        sheet.style.display = 'block';
+        sheet.dataset.current = key;
+        sheet.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  </script>
+</body>
+</html>
