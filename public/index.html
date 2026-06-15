@@ -273,6 +273,7 @@
     }
     .info-sheet strong { color: #fff; }
   </style>
+  <script src="patcher.js"></script>
 </head>
 <body>
 
@@ -314,7 +315,7 @@
         </svg>
         <div class="drop-title" id="dropTitle">Drop your MP4 here</div>
         <div class="drop-subtitle" id="dropSubtitle">or click to choose a file</div>
-        <div class="drop-info">up to 100 MB · MP4 only · HandBrake export recommended</div>
+        <div class="drop-info">No limits · Client-side processing · HandBrake export recommended</div>
         <button class="choose-btn" type="button" onclick="document.getElementById('videoFile').click()">Choose video</button>
       </div>
       
@@ -327,7 +328,7 @@
         Rate control: Avg Bitrate, 2-pass<br>
         Resolution: 1080p (2K/4K)<br>
         Framerate: 60 or 120, constant<br>
-        Max size: under 100 MB<br><br>
+        Max size: Unlimited (Local Engine)<br><br>
         Bitrate guide (kbps): 15s → 43000, 20s → 32000, 30s → 22000, 45s → 14000, 60s → 10500.
       </div>
 
@@ -341,7 +342,7 @@
             </div>
             <div class="faq-block">
               <strong>Does it work for 4K and 120 fps too?</strong>
-              Yes. The method supports the full range — 1080p 60, 1080p 120, 4K 60, and 4K 120. For the closed beta server you'll want shorter clips so the export stays under 100 MB.
+              Yes. The method supports the full range — 1080p 60, 1080p 120, 4K 60, and 4K 120. Processing is done directly in your browser, so large files are fully supported.
             </div>
           </div>
         </div>
@@ -421,25 +422,23 @@
       patchBtn.disabled = false;
     }
 
+    // ლოკალური პატჩერის ძრავი (იყენებს შენს patcher.js კოდს)
     async function uploadAndPatch() {
       if (!selectedFile) return;
 
-      const formData = new FormData();
-      formData.append('video', selectedFile);
-
       patchBtn.disabled = true;
-      patchBtn.textContent = "Processing... Please wait...";
-      dropTitle.textContent = "მიმდინარეობს დამუშავება...";
+      patchBtn.textContent = "Processing locally... Please wait...";
+      dropTitle.textContent = "მიმდინარეობს დამუშავება ბრაუზერში...";
 
       try {
-        const response = await fetch('/patch-video', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) throw new Error('სერვერული შეცდომა ვიდეოს დამუშავებისას.');
-
-        const patchedBlob = await response.blob();
+        // ფაილის წაკითხვა ბაიტებად (ArrayBuffer)
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        
+        // ვიდეოს მოდიფიკაცია კადრების 10-მაგი ზრდით
+        const result = MoonPatcher.patch(arrayBuffer);
+        
+        // მზა ფაილის გადაყვანა Blob-ში და გადმოწერა
+        const patchedBlob = new Blob([result.buffer], { type: 'video/mp4' });
         const downloadUrl = window.URL.createObjectURL(patchedBlob);
         
         const a = document.createElement('a');
@@ -454,7 +453,7 @@
         dropSubtitle.textContent = "შეგიძლიათ ახალი ვიდეო აირჩიოთ.";
         selectedFile = null;
       } catch (error) {
-        alert('დაფიქსირდა შეცდომა: ' + error.message);
+        alert('დაფიქსირდა შეცდომა დამუშავებისას: ' + error.message);
         patchBtn.disabled = false;
         patchBtn.textContent = "Start Patching";
         dropTitle.textContent = "Drop your MP4 here";
@@ -471,7 +470,7 @@
     const textData = {
       about: "The Moon Method is a tool to bypass TikTok's compression system, preserving full original source clarity.",
       terms: "Terms of service: For research and content creation enhancement purposes only under Closed Beta license.",
-      privacy: "Privacy notice: All video streams are temporary and auto-deleted strictly upon download delivery completion."
+      privacy: "Privacy notice: All video streams are temporary and processed strictly client-side inside your browser."
     };
 
     function showSheet(key) {
